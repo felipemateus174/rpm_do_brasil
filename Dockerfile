@@ -1,22 +1,22 @@
+# Usa Python 3.11 slim para manter a imagem leve
 FROM python:3.11-slim
 
-# Set working directory
+# Define diretório de trabalho
 WORKDIR /app
 
-# Copy requirements file first (to leverage Docker layer caching)
+# Copia o arquivo de dependências
 COPY requirements.txt .
 
-# Install Python dependencies first (including playwright)
+# Instala as dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install browser-use
+# Instala o browser-use e Playwright
+RUN pip install --no-cache-dir browser-use && python -m playwright install
 
-RUN python -m playwright install
+# Define variáveis de ambiente para Playwright
+ENV PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright
 
-# Install system dependencies for Playwright using playwright install-deps
-RUN playwright install-deps
-
-# Install additional dependencies for Xvfb and Chromium (if needed)
+# Instala dependências do sistema para Playwright e Xvfb
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
     x11-xkb-utils \
@@ -44,18 +44,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Playwright browsers (required by browser-use)
+# Instala Playwright e os navegadores necessários
 RUN python -m playwright install chromium
 
-# Copy application code
+# Copia o código-fonte para o contêiner
 COPY . .
 
-# Expose port for Easypanel
+# Expõe a porta para conexão externa
 EXPOSE 8085
 
-# Set environment variables
+# Configura variáveis de ambiente
 ENV PYTHONUNBUFFERED=1
 ENV DISPLAY=:99
 
-# Command to start the application
-CMD ["xvfb-run python3.11 browser_use_rpm_do_brasil.py"]
+# Comando de inicialização usando Gunicorn para melhor performance
+CMD ["xvfb-run", "--server-args='-screen 0 1920x1080x24'", "gunicorn", "-w", "2", "-b", "0.0.0.0:8085", "browser_use_rpm_do_brasil:app"]
