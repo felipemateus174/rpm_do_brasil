@@ -3,13 +3,13 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for browser-use (Playwright) using playwright install-deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+# Copy requirements file first (to leverage Docker layer caching)
+COPY requirements.txt .
 
-# Install Playwright system dependencies
+# Install Python dependencies first (including playwright)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install system dependencies for Playwright using playwright install-deps
 RUN playwright install-deps
 
 # Install additional dependencies for Xvfb and Chromium (if needed)
@@ -39,12 +39,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg2 \
     && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements file
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright browsers (required by browser-use)
 RUN python -m playwright install && python -m playwright install chromium
