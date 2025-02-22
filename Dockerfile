@@ -50,10 +50,6 @@ RUN python -m playwright install chromium
 # Copy application code
 COPY . .
 
-# Create start script for Xvfb and the application
-RUN echo '#!/bin/bash\nXvfb :99 -screen 0 1280x1024x24 &\nexport DISPLAY=:99\npython browser_use_rpm_do_brasil.py' > /app/start.sh \
-    && chmod +x /app/start.sh
-
 # Expose port for Easypanel
 EXPOSE 8085
 
@@ -62,4 +58,4 @@ ENV PYTHONUNBUFFERED=1
 ENV DISPLAY=:99
 
 # Command to start the application
-CMD ["/app/start.sh"]
+CMD ["xvfb-run python3.11 browser_use_rpm_do_brasil.py"]
