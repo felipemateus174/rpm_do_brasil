@@ -3,7 +3,16 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for browser-use (Playwright)
+# Install system dependencies for browser-use (Playwright) using playwright install-deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Playwright system dependencies
+RUN playwright install-deps
+
+# Install additional dependencies for Xvfb and Chromium (if needed)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
     x11-xkb-utils \
