@@ -48,6 +48,8 @@ RUN python -m playwright install && python -m playwright install chromium
 
 RUN pip install --upgrade browser-use
 
+RUN pip install --upgrade pillow
+
 # Copy application code
 COPY . .
 
