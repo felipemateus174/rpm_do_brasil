@@ -46,6 +46,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Playwright browsers (required by browser-use)
 RUN python -m playwright install && python -m playwright install chromium
 
+RUN pip install --upgrade browser-use
+
 # Copy application code
 COPY . .
 
