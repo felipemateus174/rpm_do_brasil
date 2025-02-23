@@ -134,3 +134,7 @@ wrapt==1.17.2
 wsproto==1.2.0
 yarl==1.18.3
 zipp==3.21.0
+markdown-it-py==3.0.0
+mdurl==0.1.2
+pygments==2.19.1
+rich==13.9.4
