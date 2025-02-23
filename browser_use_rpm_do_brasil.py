@@ -3,6 +3,7 @@ from browser_use import Agent
 from dotenv import load_dotenv
 from flask import Flask, request, Response, jsonify
 import asyncio
+import json
 
 load_dotenv()
 
@@ -125,10 +126,17 @@ def handle_request():
             return jsonify({'error': 'Parâmetros obrigatórios faltando: codigo e marca'}), 400
             
         result = asyncio.run(search_product(codigo, marca))
-        # Se result não for uma string, converte para string.
-        raw_data = result if isinstance(result, str) else str(result)
-        # Retorna como texto simples para evitar erros de JSON.
-        return Response(raw_data, mimetype='text/plain')
+        
+        # Improved result handling
+        try:
+            if isinstance(result, str):
+                return jsonify(json.loads(result))
+            elif hasattr(result, '__dict__'):
+                return jsonify(result.__dict__)
+            else:
+                return jsonify({"data": str(result)})
+        except json.JSONDecodeError:
+            return jsonify({"data": str(result)})
         
     except Exception as e:
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
