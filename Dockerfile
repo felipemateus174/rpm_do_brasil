@@ -1,13 +1,7 @@
-FROM ubuntu:24.04  # Usar a mesma base que o servidor do Easypanel
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
-
-# Atualize e instale dependências básicas
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file first (to leverage Docker layer caching)
 COPY requirements.txt .
@@ -18,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install system dependencies for Playwright using playwright install-deps
 RUN playwright install-deps
 
-# Instale dependências específicas para Xvfb, Playwright e Chromium
+# Install additional dependencies for Xvfb and Chromium
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
     x11-xkb-utils \
@@ -42,6 +36,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxss1 \
     fonts-liberation \
     libxkbcommon0 \
+    wget \
+    gnupg2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Playwright browsers (required by browser-use)
@@ -50,7 +46,7 @@ RUN python -m playwright install && python -m playwright install chromium
 # Copy application code
 COPY . .
 
-# Clean up any Xvfb lock files before starting and manage Xvfb process
+# Clean up any Xvfb lock files before starting
 RUN echo '#!/bin/bash\nrm -f /tmp/.X*-lock\nXvfb :99 -screen 0 1280x1024x24 &\nXVFB_PID=$!\nexport DISPLAY=:99\npython browser_use_rpm_do_brasil.py\nkill -9 $XVFB_PID' > /app/start.sh \
     && chmod +x /app/start.sh
 
