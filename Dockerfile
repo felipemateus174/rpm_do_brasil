@@ -1,8 +1,19 @@
-# Usa Python 3.11 slim para manter a imagem leve
+# Usa Python 3.11 slim para manter a imagem leve, conforme requisito do browser-use
 FROM python:3.11-slim
 
 # Define diretório de trabalho
 WORKDIR /app
+
+# Instala curl e outras dependências básicas necessárias para baixar e executar o script do uv
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instala o uv usando o script oficial da Astral
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Adiciona o uv ao PATH
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Atualiza o sistema e instala dependências do sistema necessárias para Xvfb e Playwright
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -36,13 +47,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copia o arquivo de dependências Python
 COPY requirements.txt .
 
-# Instala as dependências Python do requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Instala as dependências do requirements.txt usando uv
+RUN uv pip install --no-cache -r requirements.txt
 
-# Instala o pacote browser-use (assumindo que é necessário separadamente)
-RUN pip install --no-cache-dir browser-use
+# Instala o browser-use usando uv, conforme instruções do quickstart
+RUN uv pip install --no-cache browser-use
 
-# Instala o Playwright e o navegador Chromium
+# Instala o Playwright e o Chromium
 RUN python -m playwright install chromium
 
 # Define variáveis de ambiente para Playwright e execução
@@ -53,8 +64,8 @@ ENV DISPLAY=:99
 # Copia o restante do código-fonte para o contêiner
 COPY . .
 
-# Expõe a porta para conexão externa
+# Expõe a porta para conexão externa (mantida por consistência, mas pode não ser usada dependendo do script)
 EXPOSE 8085
 
-# Comando de inicialização com Xvfb e Gunicorn para rodar a aplicação
-CMD ["xvfb-run", "--server-args=-screen 0 1920x1080x24", "gunicorn", "-w", "2", "-b", "0.0.0.0:8085", "browser_use_rpm_do_brasil:app"]
+# Comando de inicialização com Xvfb para rodar o script Python
+CMD ["xvfb-run", "python3.11", "browser_use_rpm_do_brasil.py"]
