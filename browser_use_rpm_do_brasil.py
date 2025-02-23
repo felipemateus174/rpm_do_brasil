@@ -1,15 +1,8 @@
 from langchain_openai import ChatOpenAI
-from browser_use import Agent, BrowserConfig
+from browser_use import Agent
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, Response, jsonify
 import asyncio
-import json
-from rich import print as rprint
-from rich.console import Console
-from rich.panel import Panel
-from rich.json import JSON
-
-console = Console()
 
 load_dotenv()
 
@@ -123,43 +116,21 @@ def handle_request():
     try:
         data = request.get_json()
         if not data:
-            rprint("[red]Erro: Dados JSON ausentes[/red]")
             return jsonify({"error": "Dados JSON ausentes"}), 400
             
         codigo = data.get('codigo')
         marca = data.get('marca')
         
         if not codigo or not marca:
-            rprint("[red]Erro: Parâmetros obrigatórios faltando[/red]")
             return jsonify({'error': 'Parâmetros obrigatórios faltando: codigo e marca'}), 400
-        
-        # Print search parameters
-        console.print(Panel(f"[yellow]Buscando produto:[/yellow]\nCódigo: {codigo}\nMarca: {marca}", 
-                          title="Parâmetros de Busca"))
             
         result = asyncio.run(search_product(codigo, marca))
-        
-        # Improved result handling with rich printing
-        try:
-            if isinstance(result, str):
-                try:
-                    json_data = json.loads(result)
-                    console.print(Panel(JSON(json_data), title="Resultado da Busca"))
-                except json.JSONDecodeError:
-                    console.print(Panel(f"[white]{result}[/white]", title="Resultado da Busca"))
-            elif hasattr(result, '__dict__'):
-                console.print(Panel(JSON(result.__dict__), title="Resultado da Busca"))
-            else:
-                console.print(Panel(f"[white]{str(result)}[/white]", title="Resultado da Busca"))
-            
-            return jsonify({"status": "success"})
-            
-        except json.JSONDecodeError:
-            console.print(Panel(f"[white]{str(result)}[/white]", title="Resultado (Formato não-JSON)"))
-            return jsonify({"status": "success"})
+        # Se result não for uma string, converte para string.
+        raw_data = result if isinstance(result, str) else str(result)
+        # Retorna como texto simples para evitar erros de JSON.
+        return Response(raw_data, mimetype='text/plain')
         
     except Exception as e:
-        console.print(f"[red]Erro interno: {str(e)}[/red]")
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
 if __name__ == '__main__':
