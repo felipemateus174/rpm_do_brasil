@@ -47,11 +47,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copia o arquivo de dependências Python
 COPY requirements.txt .
 
-# Instala as dependências do requirements.txt usando uv
-RUN uv pip install --no-cache -r requirements.txt
+# Instala as dependências do requirements.txt usando uv com a flag --system
+RUN uv pip install --system --no-cache -r requirements.txt
 
-# Instala o browser-use usando uv, conforme instruções do quickstart
-RUN uv pip install --no-cache browser-use
+# Instala o browser-use usando uv com a flag --system
+RUN uv pip install --system --no-cache browser-use
 
 # Instala o Playwright e o Chromium
 RUN python -m playwright install chromium
