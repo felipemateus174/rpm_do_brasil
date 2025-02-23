@@ -68,6 +68,7 @@ COPY . .
 EXPOSE 8085
 
 # Comando de inicialização com Xvfb para rodar o script Python
+CMD ["source" "$HOME/.local/bin/env"]
 CMD ["uv" "venv" "--python 3.11"]
 CMD ["source" ".venv/bin/activate"]
 CMD ["xvfb-run", "python3.11", "browser_use_rpm_do_brasil.py"]
