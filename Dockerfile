@@ -1,4 +1,4 @@
-# Usa Python 3.11 slim para manter a imagem leve, conforme requisito do browser-use
+# Usa Python 3.11 slim para manter a imagem leve
 FROM python:3.11-slim
 
 # Define diretório de trabalho
@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Instala o uv usando o script oficial da Astral
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Adiciona o uv ao PATH
-ENV PATH="/root/.cargo/bin:${PATH}"
+# Adiciona o diretório do uv ao PATH
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Atualiza o sistema e instala dependências do sistema necessárias para Xvfb e Playwright
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -64,7 +64,7 @@ ENV DISPLAY=:99
 # Copia o restante do código-fonte para o contêiner
 COPY . .
 
-# Expõe a porta para conexão externa (mantida por consistência, mas pode não ser usada dependendo do script)
+# Expõe a porta para conexão externa (se necessário)
 EXPOSE 8085
 
 # Comando de inicialização com Xvfb para rodar o script Python
