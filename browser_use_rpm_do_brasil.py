@@ -3,6 +3,7 @@ from browser_use import Agent
 from dotenv import load_dotenv
 from flask import Flask, request, Response, jsonify
 import asyncio
+import json
 
 load_dotenv()
 
@@ -101,9 +102,6 @@ async def search_product(codigo: str, marca: str):
             Selecionar o produto mais próximo com base na correspondência entre {codigo} e {marca}.
             Se nenhum produto exato for encontrado, retornar o mais relevante disponível.
             O JSON deve estar devidamente formatado e validado.
-            markdown
-            Copiar
-            Editar 
         """,
 
         llm=llm,
@@ -111,25 +109,96 @@ async def search_product(codigo: str, marca: str):
     result = await agent.run()
     return result
 
+async def search_multiple_products(produtos):
+    """
+    Busca múltiplos produtos em paralelo.
+    
+    Args:
+        produtos: Lista de dicionários com 'codigo', 'marca' e 'quantidade'
+        
+    Returns:
+        Lista de resultados para cada produto
+    """
+    # Cria uma lista de tarefas para buscar cada produto
+    tasks = []
+    for produto in produtos:
+        codigo = produto.get('codigo')
+        marca = produto.get('marca')
+        quantidade = produto.get('quantidade', 1)
+        
+        # Para cada produto, adiciona a tarefa à lista
+        tasks.append(search_product(codigo, marca))
+    
+    # Executa todas as buscas em paralelo
+    results = await asyncio.gather(*tasks)
+    
+    # Formata os resultados incluindo a quantidade
+    formatted_results = []
+    for i, result in enumerate(results):
+        try:
+            # Converte o resultado para um dicionário, caso seja uma string JSON
+            if isinstance(result, str):
+                result_dict = json.loads(result)
+            else:
+                result_dict = result
+                
+            # Adiciona a quantidade ao resultado
+            quantidade = produtos[i].get('quantidade', 1)
+            if isinstance(result_dict, dict) and 'produto' in result_dict:
+                result_dict['quantidade'] = quantidade
+            
+            formatted_results.append(result_dict)
+        except Exception as e:
+            # Em caso de erro, adiciona um resultado de erro
+            formatted_results.append({
+                'error': f'Erro ao processar produto {produtos[i].get("codigo")}: {str(e)}',
+                'raw_result': str(result)
+            })
+    
+    return formatted_results
+
 @app.route('/produtos', methods=['POST'])
 def handle_request():
     try:
         data = request.get_json()
         if not data:
             return jsonify({"error": "Dados JSON ausentes"}), 400
-            
-        codigo = data.get('codigo')
-        marca = data.get('marca')
         
-        if not codigo or not marca:
-            return jsonify({'error': 'Parâmetros obrigatórios faltando: codigo e marca'}), 400
+        # Verifica se os dados estão no novo formato com array
+        if isinstance(data, list) and len(data) > 0 and 'query' in data[0] and 'produtos' in data[0]['query']:
+            produtos = data[0]['query']['produtos']
             
-        result = asyncio.run(search_product(codigo, marca))
-        # Se result não for uma string, converte para string.
-        raw_data = result if isinstance(result, str) else str(result)
-        # Retorna como texto simples para evitar erros de JSON.
-        return Response(raw_data, mimetype='text/plain')
+            # Verifica se há produtos para processar
+            if not produtos:
+                return jsonify({'error': 'Lista de produtos vazia'}), 400
+                
+            # Processa múltiplos produtos
+            results = asyncio.run(search_multiple_products(produtos))
+            
+            # Retorna os resultados em formato JSON
+            response = {
+                'resultados': results
+            }
+            
+            return jsonify(response)
+            
+        # Formato antigo (apenas um produto)
+        elif 'codigo' in data and 'marca' in data:
+            codigo = data.get('codigo')
+            marca = data.get('marca')
+            
+            if not codigo or not marca:
+                return jsonify({'error': 'Parâmetros obrigatórios faltando: codigo e marca'}), 400
+                
+            result = asyncio.run(search_product(codigo, marca))
+            # Se result não for uma string, converte para string.
+            raw_data = result if isinstance(result, str) else str(result)
+            # Retorna como texto simples para evitar erros de JSON.
+            return Response(raw_data, mimetype='text/plain')
         
+        else:
+            return jsonify({'error': 'Formato de dados inválido. Esperado: lista com query.produtos ou objeto com codigo e marca'}), 400
+            
     except Exception as e:
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
