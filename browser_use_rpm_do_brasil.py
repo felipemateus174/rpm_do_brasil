@@ -17,12 +17,10 @@ llm = ChatOpenAI(model="gpt-4o")
 
 async def search_product(codigo: str, marca: str):
     try:
-        # Log dos valores recebidos para verificar se estão chegando corretamente
         logger.debug(f"search_product recebeu: codigo={codigo}, marca={marca}")
         
-        # Validação mais explícita para evitar falsos positivos
-        if codigo is None or marca is None or codigo == "" or marca == "":
-            raise ValueError("Código e marca são obrigatórios")
+        if not codigo or not marca:
+            raise ValueError(f"Código e marca são obrigatórios. Recebido: codigo='{codigo}', marca='{marca}'")
             
         agent = Agent(
             task=f"""# INSTRUÇÕES PARA A EXECUÇÃO DA PESQUISA AUTOMATIZADA
@@ -133,13 +131,12 @@ Retornar JSON válido no seguinte formato:
         )
         result = await agent.run()
         
-        # Log do resultado bruto para verificar o que o Agent retorna
-        logger.debug(f"Resultado bruto do Agent: {result}")
-        
-        # Garantir que o resultado seja um JSON válido
-        if isinstance(result, str):
-            result = json.loads(result)
-        return result
+        # Return the raw result as string without JSON parsing
+        return {
+            "raw_result": str(result),
+            "codigo": codigo,
+            "marca": marca
+        }
         
     except Exception as e:
         logger.error(f"Erro em search_product: {str(e)}")
@@ -159,14 +156,20 @@ async def search_multiple_products(produtos):
     Returns:
         Lista de resultados para cada produto
     """
+    if not produtos:
+        raise ValueError("Lista de produtos vazia")
+
     tasks = []
-    for produto in produtos:
+    for i, produto in enumerate(produtos):
         codigo = produto.get('codigo')
         marca = produto.get('marca')
-        quantidade = produto.get('quantidade', 1)
         
-        # Log para verificar os valores antes de chamar search_product
-        logger.debug(f"Chamando search_product com codigo={codigo}, marca={marca}")
+        # Improved validation
+        if not codigo or not marca:
+            raise ValueError(f"Produto {i+1}: código e marca são obrigatórios. Recebido: {produto}")
+            
+        quantidade = produto.get('quantidade', 1)
+        logger.debug(f"Processando produto {i+1}: codigo={codigo}, marca={marca}, quantidade={quantidade}")
         tasks.append(search_product(codigo, marca))
     
     # Executa todas as buscas em paralelo
@@ -176,16 +179,14 @@ async def search_multiple_products(produtos):
     formatted_results = []
     for i, result in enumerate(results):
         try:
-            if isinstance(result, str):
-                result_dict = json.loads(result)
-            else:
-                result_dict = result
-                
             quantidade = produtos[i].get('quantidade', 1)
-            if isinstance(result_dict, dict) and 'produto' in result_dict:
-                result_dict['quantidade'] = quantidade
-            
-            formatted_results.append(result_dict)
+            # Add raw result directly without JSON parsing
+            formatted_results.append({
+                "raw_result": str(result),
+                "codigo": produtos[i].get('codigo'),
+                "marca": produtos[i].get('marca'),
+                "quantidade": quantidade
+            })
         except Exception as e:
             logger.error(f"Erro ao formatar resultado {i}: {str(e)}")
             formatted_results.append({
@@ -199,38 +200,41 @@ async def search_multiple_products(produtos):
 def handle_request():
     try:
         data = request.get_json()
-        # Log dos dados recebidos para verificar o JSON bruto
         logger.debug(f"Dados recebidos: {data}")
         
+        # Improved validation with more specific error messages
         if not data:
-            return jsonify({"error": "Dados JSON ausentes ou malformados"}), 400
-        
-        if not isinstance(data, dict) or 'query' not in data or 'produtos' not in data['query']:
-            return jsonify({
-                "error": "Formato inválido. Esperado: {query: {produtos: [...]}}",
-                "received": data
-            }), 400
-        
+            return jsonify({"error": "Dados JSON ausentes"}), 400
+            
+        if not isinstance(data, dict):
+            return jsonify({"error": "Dados devem ser um objeto JSON"}), 400
+            
+        if 'query' not in data:
+            return jsonify({"error": "Campo 'query' não encontrado"}), 400
+            
+        if not isinstance(data['query'], dict):
+            return jsonify({"error": "Campo 'query' deve ser um objeto"}), 400
+            
+        if 'produtos' not in data['query']:
+            return jsonify({"error": "Campo 'produtos' não encontrado em 'query'"}), 400
+            
         produtos = data['query']['produtos']
-        # Log dos produtos extraídos
-        logger.debug(f"Produtos extraídos: {produtos}")
         
-        if not produtos or not isinstance(produtos, list):
-            return jsonify({"error": "Lista de produtos vazia ou inválida"}), 400
-        
-        for produto in produtos:
-            if not isinstance(produto, dict) or 'codigo' not in produto or 'marca' not in produto:
-                return jsonify({
-                    "error": "Cada produto deve ter 'codigo' e 'marca'",
-                    "invalid_product": produto
-                }), 400
+        if not isinstance(produtos, list):
+            return jsonify({"error": "Campo 'produtos' deve ser uma lista"}), 400
+            
+        if not produtos:
+            return jsonify({"error": "Lista de produtos está vazia"}), 400
+
+        # Log validation success
+        logger.info(f"Validação bem sucedida. Processando {len(produtos)} produtos")
         
         results = asyncio.run(search_multiple_products(produtos))
         return jsonify({"resultados": results})
             
-    except json.JSONDecodeError:
-        logger.error("Erro ao decodificar JSON")
-        return jsonify({"error": "JSON inválido"}), 400
+    except json.JSONDecodeError as e:
+        logger.error(f"Erro ao decodificar JSON: {str(e)}")
+        return jsonify({"error": "JSON inválido", "details": str(e)}), 400
     except Exception as e:
         logger.error(f"Erro na rota /produtos: {str(e)}")
         return jsonify({
