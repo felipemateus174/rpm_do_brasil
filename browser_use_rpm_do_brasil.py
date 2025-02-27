@@ -16,98 +16,110 @@ async def search_product(codigo: str, marca: str):
             raise ValueError("Código e marca são obrigatórios")
             
         agent = Agent(
-            task=f"""
-            Objetivo: Buscar produto na Motion
-                URL: https://www.motion.com/
+            task=f"""# INSTRUÇÕES PARA A EXECUÇÃO DA PESQUISA AUTOMATIZADA
 
-                Produto: {codigo}
-                Marca: {marca}
+## 1. Objetivo:
+Este script realiza pesquisas no site https://www.motion.com/, buscando produtos com base no código e marca informados.
 
-                Instruções:
-                1. Acesse https://www.motion.com/
-                2. No campo de pesquisa, digite: {codigo}
-                3. Aguarde o carregamento completo da página (10 segundos)
-                4. Nos resultados, encontre o *produto mais próximo* da marca {marca} com base no código fornecido.
-                5. Se houver múltiplos resultados, selecione o *produto mais relevante* considerando a similaridade do código e marca.
-                6. Entre na página do produto e capture os seguintes dados:
-                    - Nome completo do produto
-                    - Código/Part Number
-                    - Preço (se disponível)
-                    - Status de estoque/disponibilidade
-                    - URL direta do produto
-                    - Bore Type
-                    - Bore Diameter
-                    - Outside Diameter
-                    - Overall Width
-                    - Closure Type
-                    - Snap Ring Included
-                    - Bearing Material
-                    - Cage Material
-                    - Cage Type
-                    - Description
-                    - Element Material
-                    - Fillet Radius
-                    - Finish Coating
-                    - Inner Ring Width
-                    - Internal Clearance
-                    - Manufacturer Catalog Number
-                    - Manufacturer UPC Number
-                    - Max RPM
-                    - Operating Temperature Range
-                    - Precision Rating
-                    - Radial Dynamic Load Capacity
-                    - Radial Static Load Capacity
-                    - Seal Type
-                    - Series
-                    - Weight
-                    - Product Type
-                7. Caso algum campo não seja encontrado, deixe o valor como "".
+Produto: {codigo}
+Marca: {marca}
 
-                Formato de retorno: JSON válido
-                Exemplo válido:
-                ```json
-                {{
-                    "produto": {{
-                        "full_product_name": "Nome completo do produto",
-                        "part_number": "387A-20024",
-                        "price": "R$ 150,00",
-                        "stock_status": "Disponível",
-                        "direct_url": "https://www.motion.com/produto/387A-20024",
-                        "specifications": {{
-                            "bore_type": "Straight",
-                            "bore_diameter": "25 mm",
-                            "outside_diameter": "52 mm",
-                            "overall_width": "15 mm",
-                            "closure_type": "Open",
-                            "snap_ring_included": "Without Snap Ring",
-                            "bearing_material": "Bearing steel",
-                            "cage_material": "Bearing steel",
-                            "cage_type": "Sheet metal",
-                            "element_material": "Bearing steel",
-                            "fillet_radius": "1 mm",
-                            "finish_coating": "Uncoated",
-                            "inner_ring_width": "15 mm",
-                            "internal_clearance": "CN",
-                            "manufacturer_catalog_number": "6205",
-                            "max_rpm": "18000 rpm",
-                            "precision_rating": "ABEC 3",
-                            "radial_dynamic_load_capacity": "3327 lbf",
-                            "radial_static_load_capacity": "1754 lbf",
-                            "seal_type": "Open",
-                            "series": "62",
-                            "weight": "0.30 lbs",
-                            "product_type": "Radial & Deep Groove Ball Bearings"
-                        }}
-                    }}
-                }}
-                Restrições:
+## 2. Fluxo de Execução:
 
-                Retornar apenas 1 produto.
-                Selecionar o produto mais próximo com base na correspondência entre {codigo} e {marca}.
-                Se nenhum produto exato for encontrado, retornar o mais relevante disponível.
-                O JSON deve estar devidamente formatado e validado.
-            """,
+1. *Acesse o site*: https://www.motion.com/
+2. *Localize o campo de pesquisa* e insira {codigo}
+3. *Execute a pesquisa* pressionando "Enter" ou acionando o botão de busca
+4. *Aguarde o carregamento completo da página* (*mínimo 10 segundos*)
+5. *Verifique os resultados da busca*:
+   - Priorize produtos com a *marca mais próxima* de {marca}
+   - Caso não haja um produto exato, selecione o mais relevante pelo *código*
+6. *Entre na página do produto selecionado* e extraia todas as informações disponíveis
 
+## 3. Dados a Serem Extraídos:
+
+- Nome completo do produto
+- Código/Part Number
+- Preço (se disponível)
+- Status de estoque/disponibilidade
+- URL direta do produto
+- Especificações técnicas:
+  - Bore Type
+  - Bore Diameter
+  - Outside Diameter
+  - Overall Width
+  - Closure Type
+  - Snap Ring Included
+  - Bearing Material
+  - Cage Material
+  - Cage Type
+  - Description
+  - Element Material
+  - Fillet Radius
+  - Finish Coating
+  - Inner Ring Width
+  - Internal Clearance
+  - Manufacturer Catalog Number
+  - Manufacturer UPC Number
+  - Max RPM
+  - Operating Temperature Range
+  - Precision Rating
+  - Radial Dynamic Load Capacity
+  - Radial Static Load Capacity
+  - Seal Type
+  - Series
+  - Weight
+  - Product Type
+
+## 4. Formato da Saída:
+
+Retornar JSON válido no seguinte formato:
+
+{{
+    "produto": {{
+        "full_product_name": "",
+        "part_number": "",
+        "price": "",
+        "stock_status": "",
+        "direct_url": "",
+        "specifications": {{
+            "bore_type": "",
+            "bore_diameter": "",
+            "outside_diameter": "",
+            "overall_width": "",
+            "closure_type": "",
+            "snap_ring_included": "",
+            "bearing_material": "",
+            "cage_material": "",
+            "cage_type": "",
+            "description": "",
+            "element_material": "",
+            "fillet_radius": "",
+            "finish_coating": "",
+            "inner_ring_width": "",
+            "internal_clearance": "",
+            "manufacturer_catalog_number": "",
+            "manufacturer_upc_number": "",
+            "max_rpm": "",
+            "operating_temperature_range": "",
+            "precision_rating": "",
+            "radial_dynamic_load_capacity": "",
+            "radial_static_load_capacity": "",
+            "seal_type": "",
+            "series": "",
+            "weight": "",
+            "product_type": ""
+        }}
+    }}
+}}
+
+## 5. Regras e Observações:
+
+✅ Aguardar carregamento completo da página (10 segundos mínimo)
+✅ Se campo não encontrado, usar ""
+✅ Retornar apenas 1 produto mais relevante
+✅ JSON deve estar devidamente formatado e validado
+✅ Priorizar correspondência exata de marca e código
+""",
             llm=llm,
         )
         result = await agent.run()
