@@ -26,21 +26,35 @@ async def search_product(codigo: str, marca: str):
             task=f"""# INSTRUÇÕES PARA A EXECUÇÃO DA PESQUISA AUTOMATIZADA
 
 ## 1. Objetivo:
-Este script realiza pesquisas no site https://www.motion.com/, buscando produtos com base no código e marca informados.
+Este script realiza pesquisas em múltiplos sites de fornecedores, buscando produtos com base no código e marca informados, seguindo uma ordem específica até encontrar o preço ou esgotar os fornecedores.
 
 Produto: {codigo}
 Marca: {marca}
 
 ## 2. Fluxo de Execução:
 
-1. *Acesse o site*: https://www.motion.com/
-2. *Localize o campo de pesquisa* e insira {codigo}
-3. *Execute a pesquisa* pressionando "Enter" ou acionando o botão de busca
-4. *Aguarde o carregamento completo da página* (*mínimo 10 segundos*)
-5. *Verifique os resultados da busca*:
-   - Priorize produtos com a *marca mais próxima* de {marca}
-   - Caso não haja um produto exato, selecione o mais relevante pelo *código*
-6. *Entre na página do produto selecionado* e extraia todas as informações disponíveis
+### Lista de Fornecedores (em ordem de prioridade):
+1. Motion: https://www.motion.com/
+2. Abecom: https://www.loja.abecom.com.br/
+3. Quality: https://www.qualitybearingsonline.com/
+4. Misumi: https://us.misumi-ec.com/
+5. Rhia: https://shop.rhia.de/de/
+6. Samflex Estrela: https://rodavigo.net/pt
+7. Misumi UK: https://uk.misumi-ec.com/
+
+### Passos:
+1. Acesse o site do fornecedor atual (começando pelo primeiro da lista).
+2. Localize o campo de pesquisa e insira {codigo}.
+3. Execute a pesquisa pressionando "Enter" ou acionando o botão de busca.
+4. Aguarde o carregamento completo da página (mínimo 10 segundos).
+5. Verifique os resultados da busca:
+   - Priorize produtos com a marca mais próxima de {marca}.
+   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
+7. Verifique o preço:
+   - Se o preço for encontrado (diferente de "" ou indisponível), finalize a pesquisa e retorne os dados.
+   - Se o preço não for encontrado, passe para o próximo fornecedor da lista e repita os passos.
+8. Continue até encontrar o preço ou esgotar todos os fornecedores.
 
 ## 3. Dados a Serem Extraídos:
 
@@ -115,17 +129,21 @@ Retornar JSON válido no seguinte formato:
             "series": "",
             "weight": "",
             "product_type": ""
-        }}
+        }},
+        "fornecedor": ""
     }}
 }}
 
 ## 5. Regras e Observações:
 
-✅ Aguardar carregamento completo da página (10 segundos mínimo)
-✅ Se campo não encontrado, usar ""
-✅ Retornar apenas 1 produto mais relevante
-✅ JSON deve estar devidamente formatado e validado
-✅ Priorizar correspondência exata de marca e código
+✅- Aguardar carregamento completo da página (10 segundos mínimo).
+✅- Se campo não encontrado, usar "".
+✅- Retornar apenas 1 produto mais relevante por fornecedor.
+✅- JSON deve estar devidamente formatado e validado.
+✅- Priorizar correspondência exata de marca e código.
+✅- Adicionar o campo "fornecedor" no JSON com o nome do site onde o produto foi encontrado.
+✅- Parar a pesquisa assim que o preço for encontrado em um fornecedor.
+✅- Se nenhum fornecedor tiver preço, retornar os dados do último fornecedor pesquisado.
 """,
             llm=llm,
         )
