@@ -54,7 +54,8 @@ Motion:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
    - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
@@ -68,7 +69,9 @@ abecom:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
    - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
@@ -82,7 +85,9 @@ Quality:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
    - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
@@ -96,7 +101,9 @@ Misumi:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
    - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
@@ -111,7 +118,9 @@ Rhia:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
    - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
@@ -125,7 +134,9 @@ Samflex Estrela:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
    - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
@@ -139,7 +150,9 @@ Misumi UK:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
    - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
