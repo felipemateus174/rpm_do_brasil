@@ -247,6 +247,17 @@ Retornar JSON válido no seguinte formato:
 - Parar a pesquisa SOMENTE quando um preço válido for encontrado em um fornecedor.
 - Se o preço não for válido (ex.: "", "indisponível", "sob consulta"), continuar para o próximo fornecedor.
 - Se nenhum fornecedor tiver um preço válido, retornar um JSON com "price": "não encontrado" e os dados do último fornecedor pesquisado.
+Exemplos:
+Dado um código de produto como entrada, por exemplo "SL1818/210", encontre os códigos mais semelhantes ou completos com base nesse código. Priorize códigos que comecem com a mesma raiz, como "SL1818", mesmo que o restante do código seja diferente ou mais detalhado. Traga os resultados mais próximos em ordem de similaridade.
+
+Exemplo:
+Entrada: SL1818/210
+Resultado esperado:
+- SL1818/800-E-TB-N1-BR-SP5-CN/3L-IT
+- SL1818/900-E-TB-N1-BR-SP5-CN/3L-IT
+- SL1818/700-E-TB-N2-BR-SP5-CN/3L-IT
+
+Regra: aplique isso para qualquer entrada de produto, sempre trazendo os itens mais semelhantes que compartilhem o mesmo início ou estrutura parecida.
 """,
             llm=llm,
         )
