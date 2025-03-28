@@ -54,7 +54,7 @@ Motion:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - pegue somente o produto com o codigo {codigo} exato.
    - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
@@ -69,7 +69,7 @@ abecom:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - pegue somente o produto com o codigo {codigo} exato.
    - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
@@ -85,7 +85,7 @@ Quality:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - pegue somente o produto com o codigo {codigo} exato.
    - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
@@ -101,7 +101,7 @@ Misumi:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - pegue somente o produto com o codigo {codigo} exato.
    - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
@@ -118,7 +118,7 @@ Rhia:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - pegue somente o produto com o codigo {codigo} exato.
    - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
@@ -134,7 +134,7 @@ Samflex Estrela:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - pegue somente o produto com o codigo {codigo} exato.
    - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
@@ -150,7 +150,7 @@ Misumi UK:
 4. Aguarde o carregamento completo da página (mínimo 10 segundos).
 5. Verifique os resultados da busca:
    - Priorize produtos com a marca mais próxima de {marca}.
-   - Caso não haja um produto exato, selecione o mais próximo do código código.
+   - pegue somente o produto com o codigo {codigo} exato.
    - observação: Não fugir do nome (codigo) especificado, mesmo que o produto não tenha a marca especificada.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
