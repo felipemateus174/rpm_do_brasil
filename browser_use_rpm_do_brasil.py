@@ -246,7 +246,7 @@ Retornar JSON válido no seguinte formato:
 - Adicionar o campo "fornecedor" no JSON com o nome do site onde o produto foi encontrado.
 - Parar a pesquisa SOMENTE quando um preço válido for encontrado em um fornecedor.
 - Se o preço não for válido (ex.: "", "indisponível", "sob consulta"), continuar para o próximo fornecedor.
-- Se nenhum fornecedor tiver um preço válido, retornar um JSON com "price": "não encontrado" e os dados do último fornecedor pesquisado.
+- Se não encontrou nenhum produto com o codigo exato e com um valor valido, retorne um json dizendo: "procuto com o codigo {codigo} não encontrado em nenhum site"
 """,
             llm=llm,
         )
