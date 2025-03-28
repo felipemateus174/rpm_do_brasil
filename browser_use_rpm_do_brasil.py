@@ -15,13 +15,16 @@ load_dotenv()
 app = Flask(__name__)
 llm = ChatOpenAI(model="gpt-4o")
 
-async def search_product(codigo: str, marca: str):
+async def search_product(codigo: str, marca: str = None):
     try:
         logger.debug(f"search_product recebeu: codigo={codigo}, marca={marca}")
         
-        if not codigo or not marca:
-            raise ValueError(f"Código e marca são obrigatórios. Recebido: codigo='{codigo}', marca='{marca}'")
+        if not codigo:
+            raise ValueError(f"Código é obrigatório. Recebido: codigo='{codigo}'")
             
+        # Se marca não for fornecida, usamos uma instrução genérica
+        marca_text = f"Marca: {marca}" if marca else "Marca: não especificada"
+        
         agent = Agent(
             task=f"""# INSTRUÇÕES PARA A EXECUÇÃO DA PESQUISA AUTOMATIZADA
 
@@ -60,22 +63,88 @@ Motion:
 
 abecom:
 1. Acesse o site do fornecedor atual (começando com essa URL https://www.loja.abecom.com.br/loja/busca.php?loja=835310&palavra_busca=SL1818%2F210).
-2. Aguarde até 5 segundos para fechar qualquer modal inicial (como um modal de cookies), verificando o elemento com o XPath "//button[contains(text(), 'Ok, entendi') or contains(text(), 'Aceitar') or contains(@class, 'cookie') or contains(@id, 'cookie')]".
-   - Se encontrado, clique no botão para fechar o modal.
-   - Aguarde 2 segundos para garantir que o modal foi fechado.
-3. Aguarde até 15 segundos para o modal de Newsletter aparecer, verificando o elemento com o XPath "//div[contains(@class, 'modal-info') and .//div[contains(@class, 'newsletter')]]".
-   - Se o modal for encontrado:
-     a. Localize o botão de fechar com o XPath "//div[contains(@class, 'modal-info')]//div[contains(@class, 'close-icon')]".
-     b. Clique no botão de fechar.
-     c. Aguarde 2 segundos e verifique se o modal não está mais visível (usando o mesmo XPath do modal).
-     d. Se o modal ainda estiver visível, tente clicar novamente ou registre um erro e continue.
-   - Se o modal não for encontrado após 15 segundos, continue para o próximo passo.
-4. Localize o campo de pesquisa com o XPath "//input[contains(@placeholder, 'Pesquisar') or @id='search' or @name='q']" e insira {codigo}.
-5. Execute a pesquisa clicando no botão de busca com o XPath "//button[contains(@class, 'search') or contains(@type, 'submit') and (text()='Pesquisar' or contains(@aria-label, 'pesquisar'))]".
-6. Aguarde o carregamento completo da página (mínimo 10 segundos).
-7. Verifique os resultados da busca:
-8. Priorize produtos com a marca mais próxima de {marca} (se houver).
+2. Localize o campo de pesquisa e insira {codigo}.
+3. Execute a pesquisa pressionando "Enter" ou acionando o botão de busca.
+4. Aguarde o carregamento completo da página (mínimo 10 segundos).
+5. Verifique os resultados da busca:
+   - Priorize produtos com a marca mais próxima de {marca}.
+   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
+7. Verifique o preço:
+   - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
+   - Se o preço não for encontrado ou for inválido (como "", "indisponível", "sob consulta"), passe para o próximo fornecedor da lista e repita os passos.
+8. Continue até encontrar um preço válido ou esgotar todos os fornecedores.
 
+Quality:
+1. Acesse o site do fornecedor atual (começando pelo primeiro da lista).
+2. Localize o campo de pesquisa e insira {codigo}.
+3. Execute a pesquisa pressionando "Enter" ou acionando o botão de busca.
+4. Aguarde o carregamento completo da página (mínimo 10 segundos).
+5. Verifique os resultados da busca:
+   - Priorize produtos com a marca mais próxima de {marca}.
+   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
+7. Verifique o preço:
+   - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
+   - Se o preço não for encontrado ou for inválido (como "", "indisponível", "sob consulta"), passe para o próximo fornecedor da lista e repita os passos.
+8. Continue até encontrar um preço válido ou esgotar todos os fornecedores.
+
+Misumi:
+1. Acesse o site do fornecedor atual (começando pelo primeiro da lista).
+2. Localize o campo de pesquisa e insira {codigo}.
+3. Execute a pesquisa pressionando "Enter" ou acionando o botão de busca.
+4. Aguarde o carregamento completo da página (mínimo 10 segundos).
+5. Verifique os resultados da busca:
+   - Priorize produtos com a marca mais próxima de {marca}.
+   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
+7. Verifique o preço:
+   - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
+   - Se o preço não for encontrado ou for inválido (como "", "indisponível", "sob consulta"), passe para o próximo fornecedor da lista e repita os passos.
+8. Continue até encontrar um preço válido ou esgotar todos os fornecedores.
+
+
+Rhia:
+1. Acesse o site do fornecedor atual (começando pelo primeiro da lista).
+2. Localize o campo de pesquisa e insira {codigo}.
+3. Execute a pesquisa pressionando "Enter" ou acionando o botão de busca.
+4. Aguarde o carregamento completo da página (mínimo 10 segundos).
+5. Verifique os resultados da busca:
+   - Priorize produtos com a marca mais próxima de {marca}.
+   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
+7. Verifique o preço:
+   - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
+   - Se o preço não for encontrado ou for inválido (como "", "indisponível", "sob consulta"), passe para o próximo fornecedor da lista e repita os passos.
+8. Continue até encontrar um preço válido ou esgotar todos os fornecedores.
+
+Samflex Estrela:
+1. Acesse o site do fornecedor atual (começando pelo primeiro da lista).
+2. Localize o campo de pesquisa e insira {codigo}.
+3. Execute a pesquisa pressionando "Enter" ou acionando o botão de busca.
+4. Aguarde o carregamento completo da página (mínimo 10 segundos).
+5. Verifique os resultados da busca:
+   - Priorize produtos com a marca mais próxima de {marca}.
+   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
+7. Verifique o preço:
+   - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
+   - Se o preço não for encontrado ou for inválido (como "", "indisponível", "sob consulta"), passe para o próximo fornecedor da lista e repita os passos.
+8. Continue até encontrar um preço válido ou esgotar todos os fornecedores.
+
+Misumi UK:
+1. Acesse o site do fornecedor atual (começando com essa URL https://www.loja.abecom.com.br/loja/busca.php?loja=835310&palavra_busca=SL1818%2F210).
+2. Localize o campo de pesquisa e insira {codigo}.
+3. Execute a pesquisa pressionando "Enter" ou acionando o botão de busca.
+4. Aguarde o carregamento completo da página (mínimo 10 segundos).
+5. Verifique os resultados da busca:
+   - Priorize produtos com a marca mais próxima de {marca}.
+   - Caso não haja um produto exato, selecione o mais relevante pelo código.
+6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
+7. Verifique o preço:
+   - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
+   - Se o preço não for encontrado ou for inválido (como "", "indisponível", "sob consulta"), passe para o próximo fornecedor da lista e repita os passos.
+8. Continue até encontrar um preço válido ou esgotar todos os fornecedores.
 ## 3. Dados a Serem Extraídos:
 
 - Nome completo do produto
@@ -174,7 +243,7 @@ Retornar JSON válido no seguinte formato:
         return {
             "raw_result": str(result),
             "codigo": codigo,
-            "marca": marca
+            "marca": marca if marca else ""
         }
         
     except Exception as e:
@@ -182,7 +251,7 @@ Retornar JSON válido no seguinte formato:
         return {
             "error": f"Erro ao buscar produto {codigo}: {str(e)}",
             "codigo": codigo,
-            "marca": marca
+            "marca": marca if marca else ""
         }
 
 async def search_multiple_products(produtos):
@@ -223,7 +292,7 @@ async def search_multiple_products(produtos):
             formatted_results.append({
                 "raw_result": str(result),
                 "codigo": produtos[i].get('codigo'),
-                "marca": produtos[i].get('marca'),
+                "marca": produtos[i].get('marca', ""),
                 "quantidade": quantidade
             })
         except Exception as e:
