@@ -26,7 +26,7 @@ async def search_product(codigo: str, marca: str):
             task=f"""# INSTRUÇÕES PARA A EXECUÇÃO DA PESQUISA AUTOMATIZADA
 
 ## 1. Objetivo:
-Este script realiza pesquisas em múltiplos sites de fornecedores, buscando produtos com base no código e marca informados, seguindo uma ordem específica até encontrar o preço ou esgotar os fornecedores.
+Este script realiza pesquisas em múltiplos sites de fornecedores, buscando produtos com base no código e marca informados, seguindo uma ordem específica até encontrar um preço válido ou esgotar os fornecedores.
 
 Produto: {codigo}
 Marca: {marca}
@@ -35,7 +35,7 @@ Marca: {marca}
 
 ### Lista de Fornecedores (em ordem de prioridade):
 1. Motion: https://www.motion.com/
-2. Abecom: https://www.loja.abecom.com.br/
+2. Abecom: https://www.loja.abecom.com.br/loja/busca.php?loja=835310&palavra_busca=SL1818%2F210
 3. Quality: https://www.qualitybearingsonline.com/
 4. Misumi: https://us.misumi-ec.com/
 5. Rhia: https://shop.rhia.de/de/
@@ -43,6 +43,8 @@ Marca: {marca}
 7. Misumi UK: https://uk.misumi-ec.com/
 
 ### Passos:
+
+Motion:
 1. Acesse o site do fornecedor atual (começando pelo primeiro da lista).
 2. Localize o campo de pesquisa e insira {codigo}.
 3. Execute a pesquisa pressionando "Enter" ou acionando o botão de busca.
@@ -52,15 +54,33 @@ Marca: {marca}
    - Caso não haja um produto exato, selecione o mais relevante pelo código.
 6. Entre na página do produto selecionado e extraia todas as informações disponíveis.
 7. Verifique o preço:
-   - Se o preço for encontrado (diferente de "" ou indisponível), finalize a pesquisa e retorne os dados.
-   - Se o preço não for encontrado, passe para o próximo fornecedor da lista e repita os passos.
-8. Continue até encontrar o preço ou esgotar todos os fornecedores.
+   - Se o preço for encontrado e for um valor válido (diferente de "", "indisponível", "sob consulta" ou similar), finalize a pesquisa e retorne os dados.
+   - Se o preço não for encontrado ou for inválido (como "", "indisponível", "sob consulta"), passe para o próximo fornecedor da lista e repita os passos.
+8. Continue até encontrar um preço válido ou esgotar todos os fornecedores.
+
+abecom:
+1. Acesse o site do fornecedor atual (começando com essa URL https://www.loja.abecom.com.br/loja/busca.php?loja=835310&palavra_busca=SL1818%2F210).
+2. Aguarde até 5 segundos para fechar qualquer modal inicial (como um modal de cookies), verificando o elemento com o XPath "//button[contains(text(), 'Ok, entendi') or contains(text(), 'Aceitar') or contains(@class, 'cookie') or contains(@id, 'cookie')]".
+   - Se encontrado, clique no botão para fechar o modal.
+   - Aguarde 2 segundos para garantir que o modal foi fechado.
+3. Aguarde até 15 segundos para o modal de Newsletter aparecer, verificando o elemento com o XPath "//div[contains(@class, 'modal-info') and .//div[contains(@class, 'newsletter')]]".
+   - Se o modal for encontrado:
+     a. Localize o botão de fechar com o XPath "//div[contains(@class, 'modal-info')]//div[contains(@class, 'close-icon')]".
+     b. Clique no botão de fechar.
+     c. Aguarde 2 segundos e verifique se o modal não está mais visível (usando o mesmo XPath do modal).
+     d. Se o modal ainda estiver visível, tente clicar novamente ou registre um erro e continue.
+   - Se o modal não for encontrado após 15 segundos, continue para o próximo passo.
+4. Localize o campo de pesquisa com o XPath "//input[contains(@placeholder, 'Pesquisar') or @id='search' or @name='q']" e insira {codigo}.
+5. Execute a pesquisa clicando no botão de busca com o XPath "//button[contains(@class, 'search') or contains(@type, 'submit') and (text()='Pesquisar' or contains(@aria-label, 'pesquisar'))]".
+6. Aguarde o carregamento completo da página (mínimo 10 segundos).
+7. Verifique os resultados da busca:
+8. Priorize produtos com a marca mais próxima de {marca} (se houver).
 
 ## 3. Dados a Serem Extraídos:
 
 - Nome completo do produto
 - Código/Part Number
-- Preço (se disponível)
+- Preço (obrigatório, deve ser um valor numérico ou formatado como moeda)
 - Status de estoque/disponibilidade
 - URL direta do produto
 - Especificações técnicas:
@@ -99,7 +119,7 @@ Retornar JSON válido no seguinte formato:
     "produto": {{
         "full_product_name": "",
         "part_number": "",
-        "price": "",
+        "price": "",  // Deve ser um valor válido (ex.: "123.45", "$123.45", "€123,45")
         "stock_status": "",
         "direct_url": "",
         "specifications": {{
@@ -136,14 +156,15 @@ Retornar JSON válido no seguinte formato:
 
 ## 5. Regras e Observações:
 
-✅- Aguardar carregamento completo da página (10 segundos mínimo).
-✅- Se campo não encontrado, usar "".
-✅- Retornar apenas 1 produto mais relevante por fornecedor.
-✅- JSON deve estar devidamente formatado e validado.
-✅- Priorizar correspondência exata de marca e código.
-✅- Adicionar o campo "fornecedor" no JSON com o nome do site onde o produto foi encontrado.
-✅- Parar a pesquisa assim que o preço for encontrado em um fornecedor.
-✅- Se nenhum fornecedor tiver preço, retornar os dados do último fornecedor pesquisado.
+- Aguardar carregamento completo da página (10 segundos mínimo).
+- Se um campo não for encontrado, usar "", exceto para o preço, que é obrigatório.
+- Retornar apenas 1 produto mais relevante por fornecedor.
+- JSON deve estar devidamente formatado e validado.
+- Priorizar correspondência exata de marca e código.
+- Adicionar o campo "fornecedor" no JSON com o nome do site onde o produto foi encontrado.
+- Parar a pesquisa SOMENTE quando um preço válido for encontrado em um fornecedor.
+- Se o preço não for válido (ex.: "", "indisponível", "sob consulta"), continuar para o próximo fornecedor.
+- Se nenhum fornecedor tiver um preço válido, retornar um JSON com "price": "não encontrado" e os dados do último fornecedor pesquisado.
 """,
             llm=llm,
         )
