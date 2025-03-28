@@ -204,7 +204,7 @@ async def search_multiple_products(produtos):
         marca = produto.get('marca')
         
         # Improved validation
-        if not codigo or not marca:
+        if not codigo:
             raise ValueError(f"Produto {i+1}: código e marca são obrigatórios. Recebido: {produto}")
             
         quantidade = produto.get('quantidade', 1)
