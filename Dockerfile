@@ -1,5 +1,5 @@
 # Imagem base oficial do Playwright com navegadores incluídos (Chromium, Firefox, WebKit)
-FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
+FROM mcr.microsoft.com/playwright/python:v1.49.0-noble
 
 # Define o diretório de trabalho
 WORKDIR /app
