@@ -39,16 +39,22 @@ def find_chrome_path():
             return path
 
     # 3. Busca recursiva por 'chrome' em locais comuns
+    search_dirs = ["/root", "/home", "/ms-playwright", "/usr", "/opt"]
     try:
         result = subprocess.run(
-            ["find", "/", "-name", "chrome", "-type", "f", "-executable"],
-            capture_output=True, text=True, timeout=10
+            ["find"] + search_dirs + ["-name", "chrome", "-type", "f", "-executable"],
+            capture_output=True, text=True, timeout=15
         )
+        logger.info(f"find result: {result.stdout.strip()}")
         for line in result.stdout.strip().split("\n"):
-            if line and "chromium" in line:
+            if line and ("chromium" in line or "chrome-linux" in line):
                 return line
-    except Exception:
-        pass
+        # Se não achou com 'chromium' no path, retorna o primeiro resultado
+        lines = [l for l in result.stdout.strip().split("\n") if l]
+        if lines:
+            return lines[0]
+    except Exception as e:
+        logger.warning(f"find falhou: {e}")
 
     return None
 

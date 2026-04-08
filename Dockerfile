@@ -6,7 +6,10 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instala os browsers do Playwright (fica em ~/.cache/ms-playwright/)
+# Remove lmnr se instalado como sub-dependência (causa TypeError com browser_use)
+RUN pip uninstall -y lmnr 2>/dev/null || true
+
+# Instala os browsers do Playwright
 RUN python -m playwright install chromium
 
 COPY . .
