@@ -18,19 +18,24 @@ load_dotenv()
 def find_chrome_path():
     """Detecta o caminho do Chrome/Chromium automaticamente."""
     candidates = [
-        # Docker Playwright image
+        # Docker Playwright image (home dir)
+        os.path.expanduser("~/.cache/ms-playwright/chromium-*/chrome-linux/chrome"),
+        # Docker Playwright image (root paths)
+        "/root/.cache/ms-playwright/chromium-*/chrome-linux/chrome",
         "/ms-playwright/chromium-*/chrome-linux/chrome",
         # Nix store (Replit)
         "/nix/store/*playwright*chromium*/chromium-*/chrome-linux/chrome",
+        # Local workspace cache
+        os.path.join(os.getcwd(), ".cache/ms-playwright/chromium-*/chrome-linux*/chrome"),
         # Common Linux paths
         "/usr/bin/google-chrome",
         "/usr/bin/chromium",
         "/usr/bin/chromium-browser",
     ]
     for pattern in candidates:
-        matches = glob.glob(pattern)
+        matches = sorted(glob.glob(pattern))
         if matches:
-            return matches[0]
+            return matches[-1]
     return None
 
 app = Flask(__name__)
@@ -348,6 +353,24 @@ async def search_multiple_products(produtos):
             })
     
     return formatted_results
+
+@app.route('/search', methods=['GET'])
+def handle_search():
+    """Rota GET para integração com n8n: /search?codigo=6205&marca=SKF"""
+    try:
+        codigo = request.args.get('codigo')
+        marca = request.args.get('marca')
+
+        if not codigo:
+            return jsonify({"error": "Parâmetro 'codigo' é obrigatório"}), 400
+
+        logger.info(f"GET /search - codigo={codigo}, marca={marca}")
+        result = asyncio.run(search_product(codigo, marca))
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Erro na rota /search: {str(e)}")
+        return jsonify({"error": "Erro interno do servidor", "details": str(e)}), 500
 
 @app.route('/produtos', methods=['POST'])
 def handle_request():
