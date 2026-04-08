@@ -1,5 +1,6 @@
-from langchain_openai import ChatOpenAI
-from browser_use import Agent  # Assumo que isso é um módulo customizado
+from browser_use import Agent
+from browser_use.llm.models import ChatOpenAI
+from browser_use.browser.profile import BrowserProfile
 from dotenv import load_dotenv
 from flask import Flask, request, Response, jsonify
 import asyncio
@@ -14,6 +15,12 @@ load_dotenv()
 
 app = Flask(__name__)
 llm = ChatOpenAI(model="gpt-4o")
+browser_profile = BrowserProfile(
+    executable_path="/nix/store/0n9rl5l9syy808xi9bk4f6dhnfrvhkww-playwright-browsers-chromium/chromium-1080/chrome-linux/chrome",
+    headless=True,
+    disable_security=True,
+    args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"],
+)
 
 async def search_product(codigo: str, marca: str = None):
     try:
@@ -26,6 +33,7 @@ async def search_product(codigo: str, marca: str = None):
         marca_text = f"Marca: {marca}" if marca else "Marca: não especificada"
         
         agent = Agent(
+            browser_profile=browser_profile,
             task=f"""# INSTRUÇÕES PARA A EXECUÇÃO DA PESQUISA AUTOMATIZADA
 
 ## 1. Objetivo:
