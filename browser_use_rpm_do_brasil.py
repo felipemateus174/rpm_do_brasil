@@ -6,6 +6,8 @@ from flask import Flask, request, Response, jsonify
 import asyncio
 import json
 import logging
+import os
+import glob
 
 # Configurar logging para depuração
 logging.basicConfig(level=logging.DEBUG)
@@ -13,10 +15,32 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+def find_chrome_path():
+    """Detecta o caminho do Chrome/Chromium automaticamente."""
+    candidates = [
+        # Docker Playwright image
+        "/ms-playwright/chromium-*/chrome-linux/chrome",
+        # Nix store (Replit)
+        "/nix/store/*playwright*chromium*/chromium-*/chrome-linux/chrome",
+        # Common Linux paths
+        "/usr/bin/google-chrome",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+    ]
+    for pattern in candidates:
+        matches = glob.glob(pattern)
+        if matches:
+            return matches[0]
+    return None
+
 app = Flask(__name__)
 llm = ChatOpenAI(model="gpt-4o")
+
+chrome_path = find_chrome_path()
+logger.info(f"Chrome path detectado: {chrome_path}")
+
 browser_profile = BrowserProfile(
-    executable_path="/nix/store/0n9rl5l9syy808xi9bk4f6dhnfrvhkww-playwright-browsers-chromium/chromium-1080/chrome-linux/chrome",
+    executable_path=chrome_path,
     headless=True,
     disable_security=True,
     args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"],
