@@ -64,7 +64,7 @@ langchain-ollama==0.2.2
 langchain-openai==0.3.1
 langchain-text-splitters==0.3.6
 langsmith==0.2.11
-lmnr==0.4.60
+lmnr>=0.4.71
 lxml==5.3.1
 lxml-html-clean==0.4.1
 maincontentextractor==0.0.4
