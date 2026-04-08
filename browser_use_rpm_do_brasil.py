@@ -8,6 +8,8 @@ import json
 import logging
 import os
 import glob
+import subprocess
+import shutil
 
 # Configurar logging para depuração
 logging.basicConfig(level=logging.DEBUG)
@@ -17,25 +19,37 @@ load_dotenv()
 
 def find_chrome_path():
     """Detecta o caminho do Chrome/Chromium automaticamente."""
+    # 1. Tenta glob patterns conhecidos
     candidates = [
-        # Docker Playwright image (home dir)
         os.path.expanduser("~/.cache/ms-playwright/chromium-*/chrome-linux/chrome"),
-        # Docker Playwright image (root paths)
         "/root/.cache/ms-playwright/chromium-*/chrome-linux/chrome",
         "/ms-playwright/chromium-*/chrome-linux/chrome",
-        # Nix store (Replit)
         "/nix/store/*playwright*chromium*/chromium-*/chrome-linux/chrome",
-        # Local workspace cache
         os.path.join(os.getcwd(), ".cache/ms-playwright/chromium-*/chrome-linux*/chrome"),
-        # Common Linux paths
-        "/usr/bin/google-chrome",
-        "/usr/bin/chromium",
-        "/usr/bin/chromium-browser",
     ]
     for pattern in candidates:
         matches = sorted(glob.glob(pattern))
         if matches:
             return matches[-1]
+
+    # 2. Tenta binários no PATH
+    for name in ["google-chrome", "chromium", "chromium-browser", "chrome"]:
+        path = shutil.which(name)
+        if path:
+            return path
+
+    # 3. Busca recursiva por 'chrome' em locais comuns
+    try:
+        result = subprocess.run(
+            ["find", "/", "-name", "chrome", "-type", "f", "-executable"],
+            capture_output=True, text=True, timeout=10
+        )
+        for line in result.stdout.strip().split("\n"):
+            if line and "chromium" in line:
+                return line
+    except Exception:
+        pass
+
     return None
 
 app = Flask(__name__)
